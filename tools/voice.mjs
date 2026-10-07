@@ -1,5 +1,5 @@
 // 中文油库里语音：把全片台词合成成 AquesTalk 的语音 → src/voice-data.js。按台词的 who 选声音（VOICES）：
-// 帕秋莉 f1（「ゆっくり霊夢」那把声音），琪露诺 f2。
+// 帕秋莉 f1（「ゆっくり霊夢」那把声音），琪露诺 f2，古明地觉 imd1。
 //   node tools/voice.mjs [--list]
 // 做法和社区的中文油库里一样：汉字 → 拼音（pinyin-pro，带多音字上下文）→ 片假名（平凡社音节表）→ AquesTalk 音声记号。
 // 每句一段 MP3（base64）+ 30fps 响度包络（让帕秋莉按真实语音张嘴）。改了台词就重跑一次，生成的文件要提交。
@@ -15,7 +15,7 @@ import { openFilm, ROOT } from './browser.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i < 0 ? d : process.argv[i + 1]; };
 const FF = process.env.FFMPEG || 'ffmpeg';
-const VOICES = { patchouli: { voice: 'f1', speed: 110 }, cirno: { voice: 'f2', speed: 115 } };   // 第 3 集第三稿放慢（原 120 / 125），照顾没有基础的观众
+const VOICES = { patchouli: { voice: 'f1', speed: 110 }, cirno: { voice: 'f2', speed: 115 }, satori: { voice: 'imd1', speed: 105 } };   // 古明地觉用中性、平静的 imd1，和帕秋莉的 f1 拉开   // 第 3 集第三稿放慢（原 120 / 125），照顾没有基础的观众
 
 // ---- 中文 → 音声记号 ----
 const DIG = '零一二三四五六七八九';
@@ -80,6 +80,6 @@ for (const [name, { voice, speed }] of Object.entries(VOICES)) {
 }
 rmSync(tmp, { recursive: true, force: true });
 for (const [t, v] of Object.entries(raw)) VOICE[t] = { d: v.d, env: v.env.map(r => Math.min(9, Math.round(r / peak * 12))).join(''), mp3: v.mp3 };
-const js = `'use strict';\n// 由 tools/voice.mjs 生成，别手改。中文油库里语音（AquesTalk f1 帕秋莉 / f2 琪露诺，© 株式会社アクエスト）：每句 { d 秒, env 30fps 响度 0-9, mp3 base64 }\nconst VOICE = ${JSON.stringify(VOICE)};\n`;
+const js = `'use strict';\n// 由 tools/voice.mjs 生成，别手改。中文油库里语音（AquesTalk f1 帕秋莉 / f2 琪露诺 / imd1 古明地觉，© 株式会社アクエスト）：每句 { d 秒, env 30fps 响度 0-9, mp3 base64 }\nconst VOICE = ${JSON.stringify(VOICE)};\n`;
 writeFileSync(resolve(ROOT, 'src/voice-data.js'), js);
 console.log(`src/voice-data.js：${Object.keys(VOICE).length} 句，${(js.length / 1024).toFixed(0)} KB，共 ${Object.values(VOICE).reduce((a, v) => a + v.d, 0).toFixed(0)} 秒`);
