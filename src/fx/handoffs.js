@@ -1,6 +1,6 @@
 'use strict';
 // handoffs · 形状接形状：四种不靠硬切的转场
-// 出处：第 1–4 集 各段交接（/Users/fish2lab/Project/patchouli_lecture/1/src/kit.js:362-376 handoffDisc/Thread/Sparks/Book；2-diet.js:566、3-dopamine.js:335、4-focus.js:456）
+// 出处：第 1–4 集 各段交接（patchouli_lecture/1/src/kit.js:362-376 handoffDisc/Thread/Sparks/Book；2-diet.js:566、3-dopamine.js:335、4-focus.js:456）
 // 好在哪：每种转场 8 秒，前 2.2 秒停在上一页的末态，2.2–5.0 秒这一个形状在原地长成下一页的形状（月亮的缺口滑出变成满圆盘、松垂 240 像素的线绷直成两条轨道、60 颗火花里 12 颗长成四角星并连线、蓝色星图缩到右页再绕书脊翻过去），
 //        后 3 秒留给下一页的细节出场（热气、枕木逐根弹出、星座连完、书页落平）。段与段之间只有 0.4 秒的叠化，镜头始终没有缩放，所有形状都不小于画高的 15%。
 // 复用：四个 fxHoSeg[i](c, u) 各画一整帧（含自己的底），u 为段内秒数 0..8，可单独拷出当某一集的两页之间的过渡；时间点集中在 FX_HO.t，线的颜色在 FX_HO.c。

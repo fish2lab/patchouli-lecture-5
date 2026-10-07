@@ -135,7 +135,7 @@ function s6Draw(c, tau0, L) {
     // 片尾出处：右下角两行小字
     const tc = S6DUR - 2.6, ca = sm(tc, tc + .5, tau);
     if (ca > 0) {
-      ckText(lc, '参考文献与心理援助热线见简介', 1515 + S6MX, 818, { size: 30, align: 'right', color: 'muted', al: ca });
+      ckText(lc, 'BGM 原曲：少女さとり ～ 3rd eye（ZUN）· 参考文献与心理援助热线见简介', 1515 + S6MX, 818, { size: 30, align: 'right', color: 'muted', al: ca });
       ckText(lc, '等轴测线框照 hairline（Lucas Marques, MIT）· 黑板画法照 V8 黑板报', 1515 + S6MX, 852, { size: 30, align: 'right', color: 'muted', al: ca });
     }
   });

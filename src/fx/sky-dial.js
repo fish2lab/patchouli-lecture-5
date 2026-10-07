@@ -1,6 +1,6 @@
 'use strict';
 // sky-dial · 昼夜转盘与纸雕灯箱视差
-// 出处：第 1 集 睡眠段（/Users/fish2lab/Project/patchouli_lecture/1/src/scenes/1-sleep.js:1-612，天空转盘 s1Sky、各层 s1Hills/s1Campus/s1Dorm/s1Trees/s1Ground、窗户镂空 s1Dorm 249-271、镜头 parallax）
+// 出处：第 1 集 睡眠段（patchouli_lecture/1/src/scenes/1-sleep.js:1-612，天空转盘 s1Sky、各层 s1Hills/s1Campus/s1Dorm/s1Trees/s1Ground、窗户镂空 s1Dorm 249-271、镜头 parallax）
 // 好在哪：屏幕顶边垂下一个半径 360 的半圆转盘，一圈 24 小时刻度，白天半边浅金、夜半边深紫，太阳和月亮各贴在相对的两端；12 秒里转盘走完 24 小时（起头先反拨 0.4 小时蓄一下，末尾回拨 0.3 小时落定）。
 //       天色整页只靠 6 个色标分段插值（夜、拂晓、白天、黄昏），不用渐变光；远山、中楼、近树、地面 4 层纸雕各带一圈 2×4 像素的厚边和一层偏移 (6,9) 的硬投影，镜头左右各漂 70 像素，4 层按 0.12/0.4/0.85/1.3 的比例错开，视差一眼可见。
 //       楼房的窗是真剪空的：白天透出身后的天空和远山，夜里按 0.35–0.9 的阈值一扇一扇亮起暖黄纸（共 22 扇暗着不亮），不画任何光晕。
