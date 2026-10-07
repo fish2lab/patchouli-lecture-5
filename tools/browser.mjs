@@ -14,6 +14,6 @@ export async function openFilm(query = '', { html = resolve(ROOT, 'index.html'),
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(pathToFileURL(html).href + '?bare' + (query ? '&' + query : ''));
   await page.waitForFunction(() => window.__ready === true, null, { timeout: 60000 });
-  const info = typeof __film === 'undefined' || wait !== '__ready' || !(await page.evaluate(() => window.__film)) ? null : await page.evaluate(() => ({ DUR: __film.DUR, FPS: __film.FPS, scenes: __film.scenes }));
+  const info = wait !== '__ready' || !(await page.evaluate(() => window.__film)) ? null : await page.evaluate(() => ({ DUR: __film.DUR, FPS: __film.FPS, scenes: __film.scenes }));
   return { browser, page, errors, info };
 }

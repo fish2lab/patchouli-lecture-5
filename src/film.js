@@ -4,7 +4,8 @@
 {
   const only = Q.get('scene'), noSub = Q.has('nosub');
   defineFilm(SCENES.slice().sort((a, b) => a.order - b.order).filter(s => !only || only.split(',').includes(s.key)));
-  OVERLAY = (c, s, tau, cur) => { if (s.start > 0 && !s.noFlip) turnPage(c, tau / .8); if (!noSub && cur && !s.noSub) drawSubtitle(c, cur, tau); };
+  // 本集不翻页：每段末尾用板擦把黑板擦干净（props.js 的 ogOutro），段首就是干净黑板，直接接上。
+  OVERLAY = (c, s, tau, cur) => { if (!noSub && cur && !s.noSub) drawSubtitle(c, cur, tau); };
   mountPlayer();
 }
 // 字幕（第二版）：书页底部一条剪下来的纸条，上面一行手写字。说话人不是帕秋莉时前面加名字。

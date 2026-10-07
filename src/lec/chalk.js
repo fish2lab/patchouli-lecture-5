@@ -115,7 +115,7 @@ function ckShape(lc, pts, o = {}) {
 // 字号下限 30（V8 规则）。返回整句宽度。
 function ckText(lc, text, x, y, o = {}) {
   const { size = 46, color = 'ink', align = 'left', p = 1, al = 1, base = 'alphabetic', heavy = false } = o, col = ckColor(color);
-  zh(lc, text, x, y, { size: Math.max(30, size), color: col, align, p, al, base, outline: col, ow: heavy ? size * .12 : Math.max(1.5, size * .045) });
+  zh(lc, text, x, y, { size: Math.max(30, size), color: col, align, p, al, base, outline: col, ow: heavy ? size * .07 : Math.max(1.5, size * .045) });
   return zhWidth(lc, text, size);
 }
 // ckWrite：逐字写出的进度和「笔尖」位置。返回 { p, head:[x,y], writing }
