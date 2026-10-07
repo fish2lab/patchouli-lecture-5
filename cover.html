@@ -28,24 +28,43 @@ canvas { display: block; }
 <script>
 const COV_AR = Q.get('ar') === '43' ? '43' : '169', CW = COV_AR === '43' ? 1440 : 1920, CH = 1080, cv = document.getElementById('c');
 cv.width = CW; cv.height = CH;
-// 4:3 取 1920 画面中间的 1440（左右各裁 240），元素按各自的版式重新摆
-const L = COV_AR === '43'
-  ? { ox: 240, x: 300, tag: 40, ts: 128, y1: 300, y2: 448, sub: 44, ys: 548, ter: [1330, 400, 470], sat: [1560, 990, 470], pch: [400, 1075, 360] }
-  : { ox: 0, x: 130, tag: 44, ts: 160, y1: 320, y2: 500, sub: 52, ys: 616, ter: [1340, 420, 600], sat: [1720, 1000, 520], pch: [290, 1080, 400] };
+// 瑞士式网格：黑板内 6 列、槽 24；所有字和图的边落在列线和几条横线上。两个角色同高（h 相同）、脚踩同一条地板线。
+// 16:9：左 4 列是字（片名 / 副标题 / 三种病），右 2 列是光照柱阵，两个角色站在柱阵下面。
+// 4:3：取 1920 画面中间 1440（左右各裁 240），同一套版式按列宽缩小。
+const WIDE = COV_AR === '169', OX = WIDE ? 0 : 240;
+const G = WIDE ? { M: 120, cw: 260 } : { M: 312, cw: 196 }, GUT = 24;
+const col = k => G.M + (k - 1) * (G.cw + GUT), colEnd = k => col(k) + G.cw, XR = colEnd(6);
+const Y_INFO = 128, Y_RULE = 152, FEET = 1052, CH_H = WIDE ? 430 : 360;
+function covRule(lc, x0, x1, y, seed, w = 4) { ckLine(lc, [[x0, y], [x1, y]], { w, color: 'ink', seed, amp: .6 }); }
 function covDraw(c) {
-  c.save(); c.translate(-L.ox, 0);
+  c.save(); c.translate(-OX, 0);
   ckRoom(c, 0);
-  const [tx, ty, ts] = L.ter;
+  const tsW = (colEnd(4) - col(1)) / 6 | 0;   // 「有物质的机制」6 个字压满前 4 列
+  const y1 = Y_RULE + 36 + Math.round(tsW * .86), y2 = y1 + Math.round(tsW * 1.08);
+  let terr;
   ckLayer(c, CKCAM0, lc => {
-    ckText(lc, '帕秋莉讲座 第 4 集 · 光遗传学', L.x, 150, { size: L.tag, color: 'muted' });
-    ckText(lc, '心灵的苦难', L.x, L.y1, { size: L.ts, heavy: true });
-    ckText(lc, '有物质的机制', L.x, L.y2, { size: L.ts, color: 'yellow', heavy: true });
-    ckUnderline(lc, '物质的', L.x + zhWidth(lc, '有', L.ts), L.y2, L.ts, 'ink', 1, 9);
-    ckText(lc, '2026 诺贝尔生理学或医学奖', L.x, L.ys, { size: L.sub, color: 'blue' });
-    isoTerrain(lc, { x: tx, y: ty, s: ts, light: [4, 4], r: 3, level: 1.7, beam: true });
+    // 顶线 + 信息行
+    ckText(lc, '帕秋莉讲座 第 5 集', col(1), Y_INFO, { size: 40, color: 'muted' });
+    ckText(lc, '光遗传学', XR, Y_INFO, { size: 40, color: 'muted', align: 'right' });
+    covRule(lc, col(1), XR, Y_RULE, 3);
+    // 片名
+    ckText(lc, '心灵的苦难', col(1), y1, { size: tsW, heavy: true });
+    ckText(lc, '有物质的机制', col(1), y2, { size: tsW, color: 'yellow', heavy: true });
+    ckUnderline(lc, '物质的', col(1) + zhWidth(lc, '有', tsW), y2, tsW, 'ink', 1, 9);
+    // 左 4 列：线 → 副标题 → 三种病，各自起在列线上
+    const yr = y2 + (WIDE ? 64 : 72), ys = yr + (WIDE ? 82 : 90), yi = ys + (WIDE ? 92 : 100);
+    covRule(lc, col(1), colEnd(4), yr, 5, 3);
+    ckText(lc, '2026 诺贝尔生理学或医学奖', col(1), ys, { size: WIDE ? 56 : 46, color: 'blue' });
+    [['抑郁', 1], ['精神分裂', 2], ['阿尔茨海默病', 3]].forEach(([t, k]) => ckText(lc, t, col(k), yi, { size: WIDE ? 52 : 42, color: 'pink' }));
+    // 右 2 列：柱阵，光纤从顶线落下（裁在这两列里）
+    lc.save(); lc.beginPath(); lc.rect(col(5), Y_RULE + 4, XR - col(5), 900); lc.clip();
+    terr = isoTerrain(lc, { x: (col(5) + XR) / 2, y: WIDE ? 440 : 420, s: WIDE ? 500 : 384, light: [4, 4], r: 3, level: 1.7, beam: true });
+    lc.restore();
   }, { grainAl: .4 });
-  drawPatchouli(c, { x: L.pch[0], y: L.pch[1], h: L.pch[2], facing: 1, pose: 'point', gesture: .7, mood: 'smug', t: 1.2 });
-  drawSatori(c, { x: L.sat[0], y: L.sat[1], h: L.sat[2], facing: -1, pose: 'read', mood: 'smile', read: 1, eyeLook: [.8, -.4], t: 1.2 });
+  // 两个角色：同高，脚踩同一条线，各站第 5、6 列中线
+  const xp = (col(5) + colEnd(5)) / 2 - 10, xs = (col(6) + colEnd(6)) / 2 + 10;
+  drawPatchouli(c, { x: xp, y: FEET, h: CH_H, facing: 1, pose: 'point', gesture: .7, mood: 'smug', t: 1.2 });
+  drawSatori(c, { x: xs, y: FEET, h: CH_H, facing: -1, pose: 'read', mood: 'smile', read: 1, eyeLook: [-.4, -.6], t: 1.2 });
   c.restore();
 }
 document.fonts.load('40px WenKai', '心灵的苦难有物质的机制帕秋莉讲座第集光遗传学诺贝尔生理学或医学奖').then(() => document.fonts.ready).then(() => { const c = cv.getContext('2d'); CLOCK0 = 0; covDraw(c); window.__ready = true; });

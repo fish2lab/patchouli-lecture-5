@@ -1,8 +1,8 @@
-# 心灵的苦难，有物质的机制（帕秋莉讲座 第 4 集 · 光遗传学）
+# 心灵的苦难，有物质的机制（帕秋莉讲座 第 5 集 · 光遗传学）
 
 2026 年诺贝尔生理学或医学奖（光遗传学）× 「精神疾病有物质的、可被理解的机制」。约 5 分钟，黑板报画风，古明地觉首次登场。方案、台词、来源核对见 `docs/方案.md`、`docs/来源.md`，发布文案 `docs/发布.md`。本集新增：黑板舞台 `src/lec/chalk.js`（照 V8 黑板报的规范）、粉笔线框 `src/lec/iso.js`（照 hairline 重画，MIT）、粉笔音效 `src/lec/sfx.js`、古明地觉 `src/character/satori.js`；BGM 是东方地灵殿「少女さとり ～ 3rd eye」（ZUN）的代码改编（`tools/bgm.mjs` 从扒谱取音符 → `src/bgm-data.js`，`src/core.js` 的 `score()` 编配）。
 
-出片：`npm run voice && npm run render` → `out/patchouli-lecture-4.mp4`。
+出片：`npm run voice && npm run render` → `out/patchouli-lecture-5.mp4`。
 
 ---
 
