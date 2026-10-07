@@ -8,7 +8,7 @@
   mountPlayer();
 }
 // 字幕（第二版）：书页底部一条剪下来的纸条，上面一行手写字。说话人不是帕秋莉时前面加名字。
-const WHO_NAME = { cirno: '琪露诺' };
+const WHO_NAME = { cirno: '琪露诺', satori: '古明地觉' };
 function drawSubtitle(c, cur, tau) {
   const a = Math.min(sm(cur.t0, cur.t0 + .12, tau), 1 - sm(cur.t1 - .1, cur.t1, tau));
   if (a <= 0) return;
@@ -38,7 +38,7 @@ function pageFlip(c, tau) {
 // 穿模检查（开发用）：?bbox 在两人身上画红框；?nochar 不画人物、只记包围框（tools/overlap.mjs 用）。
 // 包围框按锚点和身高估：帕秋莉宽 0.5h，琪露诺连翅膀宽 0.7h；在当前变换下换算成屏幕坐标，记进 __boxes。
 if (Q.has('bbox') || Q.has('nochar')) {
-  const noChar = Q.has('nochar'), W0 = { patchouli: .5, cirno: .7 };
+  const noChar = Q.has('nochar'), W0 = { patchouli: .5, cirno: .7, satori: .55 };
   window.__boxes = [];
   const wrap = (fn, who) => (c, o = {}) => {
     const h = o.h || (who === 'cirno' ? 460 : 520), w = h * W0[who], x = o.x || 0, y = o.y || 0, m = c.getTransform(), al = c.globalAlpha;
@@ -49,5 +49,5 @@ if (Q.has('bbox') || Q.has('nochar')) {
     if (Q.has('bbox')) { c.save(); c.setTransform(m); c.strokeStyle = '#e00'; c.lineWidth = 3; c.strokeRect(x - w / 2, y - h, w, h); c.restore(); }
     return r;
   };
-  drawPatchouli = wrap(drawPatchouli, 'patchouli'); drawCirno = wrap(drawCirno, 'cirno');
+  drawPatchouli = wrap(drawPatchouli, 'patchouli'); drawCirno = wrap(drawCirno, 'cirno'); drawSatori = wrap(drawSatori, 'satori');
 }
