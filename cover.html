@@ -32,39 +32,61 @@ cv.width = CW; cv.height = CH;
 // 16:9：左 4 列是字（片名 / 副标题 / 三种病），右 2 列是光照柱阵，两个角色站在柱阵下面。
 // 4:3：取 1920 画面中间 1440（左右各裁 240），同一套版式按列宽缩小。
 const WIDE = COV_AR === '169', OX = WIDE ? 0 : 240;
-const G = WIDE ? { M: 120, cw: 260 } : { M: 312, cw: 196 }, GUT = 24;
-const col = k => G.M + (k - 1) * (G.cw + GUT), colEnd = k => col(k) + G.cw, XR = colEnd(6);
-const Y_INFO = 128, Y_RULE = 152, FEET = 1052, CH_H = WIDE ? 430 : 360;
+// 两种比例的数值。4:3 不要地板和粉笔槽：黑板铺满整张图，左下三行字和右边两个人像拼图一样咬合。
+const L = WIDE
+  ? { M: 120, cw: 260, info: 128, rule: 152, tag: 40, gap: 64, sub: 56, subGap: 82, ill: 52, illGap: 92, illRow: false, ter: [440, 500], feet: 1052, h: 430 }
+  : { M: 312, cw: 196, info: 104, rule: 128, tag: 38, gap: 72, sub: 52, subGap: 100, ill: 66, illGap: 150, illRow: 105, ter: [372, 420], feet: 1046, h: 480 };
+const GUT = 24, col = k => L.M + (k - 1) * (L.cw + GUT), colEnd = k => col(k) + L.cw, XR = colEnd(6);
+if (!WIDE) {   // 板面扩到整张 4:3（画布坐标 x 240–1680）；粉笔层按新板面裁切
+  Object.assign(CKB, { x: OX + 30, y: 30, w: 1440 - 60, h: 1080 - 60 }); CKB.cx = CKB.x + CKB.w / 2; CKB.cy = CKB.y + CKB.h / 2;
+  Object.assign(CKCAM0, { x: CKB.cx, y: CKB.cy });
+}
+// 4:3 的背景：只有木框和板面（照 ckRoom 的画法，去掉地板、粉笔槽、板擦）
+function covBoard(c) {
+  const { x, y, w, h } = CKB;
+  c.fillStyle = CK.wall; c.fillRect(0, 0, W, H);
+  cutPaper(c, rectPts(x - 26, y - 24, w + 52, h + 46, 6), CK.frame, { seed: 3101, step: 30, blur: 14, sy: 8, grain: .14 });
+  cutPaper(c, rectPts(x - 8, y - 6, w + 16, h + 12, 3), CK.frame2, { seed: 3102, step: 40, shadow: false, grain: .1 });
+  c.save(); c.fillStyle = CK.slate; c.fillRect(x, y, w, h);
+  const g = c.createRadialGradient(x + w * .45, y + h * .4, h * .2, x + w / 2, y + h / 2, w * .62);
+  g.addColorStop(0, alpha(CK.slate2, .9)); g.addColorStop(1, alpha('#0f1c16', .65)); c.fillStyle = g; c.fillRect(x, y, w, h);
+  c.beginPath(); c.rect(x, y, w, h); c.clip();
+  c.globalAlpha = .035; c.strokeStyle = CK.ink; c.lineCap = 'round'; const r = rng(3103);
+  for (let k = 0; k < 9; k++) { c.lineWidth = 50 + r() * 70; const sx = x + r() * w, sy = y + 60 + r() * (h - 120); c.beginPath(); c.moveTo(sx, sy); c.bezierCurveTo(sx + 120, sy - 40, sx + 240, sy + 30, sx + 260 + r() * 200, sy + (r() - .5) * 60); c.stroke(); }
+  c.restore();
+  grain(c, polyPath(rectPts(x, y, w, h)), .07);
+}
 function covRule(lc, x0, x1, y, seed, w = 4) { ckLine(lc, [[x0, y], [x1, y]], { w, color: 'ink', seed, amp: .6 }); }
 function covDraw(c) {
   c.save(); c.translate(-OX, 0);
-  ckRoom(c, 0);
-  const tsW = (colEnd(4) - col(1)) / 6 | 0;   // 「有物质的机制」6 个字压满前 4 列
-  const y1 = Y_RULE + 36 + Math.round(tsW * .86), y2 = y1 + Math.round(tsW * 1.08);
-  let terr;
+  if (WIDE) ckRoom(c, 0); else covBoard(c);
+  const ts = (colEnd(4) - col(1)) / 6 | 0;   // 「有物质的机制」6 个字压满前 4 列
+  const y1 = L.rule + 36 + Math.round(ts * .86), y2 = y1 + Math.round(ts * 1.08);
   ckLayer(c, CKCAM0, lc => {
     // 顶线 + 信息行
-    ckText(lc, '帕秋莉讲座 第 5 集', col(1), Y_INFO, { size: 40, color: 'muted' });
-    ckText(lc, '光遗传学', XR, Y_INFO, { size: 40, color: 'muted', align: 'right' });
-    covRule(lc, col(1), XR, Y_RULE, 3);
+    ckText(lc, '帕秋莉讲座 第 5 集', col(1), L.info, { size: L.tag, color: 'muted' });
+    ckText(lc, '光遗传学', XR, L.info, { size: L.tag, color: 'muted', align: 'right' });
+    covRule(lc, col(1), XR, L.rule, 3);
     // 片名
-    ckText(lc, '心灵的苦难', col(1), y1, { size: tsW, heavy: true });
-    ckText(lc, '有物质的机制', col(1), y2, { size: tsW, color: 'yellow', heavy: true });
-    ckUnderline(lc, '物质的', col(1) + zhWidth(lc, '有', tsW), y2, tsW, 'ink', 1, 9);
-    // 左 4 列：线 → 副标题 → 三种病，各自起在列线上
-    const yr = y2 + (WIDE ? 64 : 72), ys = yr + (WIDE ? 82 : 90), yi = ys + (WIDE ? 92 : 100);
+    ckText(lc, '心灵的苦难', col(1), y1, { size: ts, heavy: true });
+    ckText(lc, '有物质的机制', col(1), y2, { size: ts, color: 'yellow', heavy: true });
+    ckUnderline(lc, '物质的', col(1) + zhWidth(lc, '有', ts), y2, ts, 'ink', 1, 9);
+    // 左 4 列：线 → 副标题 → 三种病（16:9 一行、各起在列线上；4:3 三行竖排）
+    const yr = y2 + L.gap, ys = yr + L.subGap, yi = ys + L.illGap;
     covRule(lc, col(1), colEnd(4), yr, 5, 3);
-    ckText(lc, '2026 诺贝尔生理学或医学奖', col(1), ys, { size: WIDE ? 56 : 46, color: 'blue' });
-    [['抑郁', 1], ['精神分裂', 2], ['阿尔茨海默病', 3]].forEach(([t, k]) => ckText(lc, t, col(k), yi, { size: WIDE ? 52 : 42, color: 'pink' }));
+    ckText(lc, '2026 诺贝尔生理学或医学奖', col(1), ys, { size: L.sub, color: 'blue' });
+    ['抑郁', '精神分裂', '阿尔茨海默病'].forEach((t, i) => L.illRow
+      ? ckText(lc, t, col(1), yi + i * L.illRow, { size: L.ill, color: 'pink' })
+      : ckText(lc, t, col(i + 1), yi, { size: L.ill, color: 'pink' }));
     // 右 2 列：柱阵，光纤从顶线落下（裁在这两列里）
-    lc.save(); lc.beginPath(); lc.rect(col(5), Y_RULE + 4, XR - col(5), 900); lc.clip();
-    terr = isoTerrain(lc, { x: (col(5) + XR) / 2, y: WIDE ? 440 : 420, s: WIDE ? 500 : 384, light: [4, 4], r: 3, level: 1.7, beam: true });
+    lc.save(); lc.beginPath(); lc.rect(col(5), L.rule + 4, XR - col(5), 900); lc.clip();
+    isoTerrain(lc, { x: (col(5) + XR) / 2, y: L.ter[0], s: L.ter[1], light: [4, 4], r: 3, level: 1.7, beam: true });
     lc.restore();
   }, { grainAl: .4 });
   // 两个角色：同高，脚踩同一条线，各站第 5、6 列中线
   const xp = (col(5) + colEnd(5)) / 2 - 10, xs = (col(6) + colEnd(6)) / 2 + 10;
-  drawPatchouli(c, { x: xp, y: FEET, h: CH_H, facing: 1, pose: 'point', gesture: .7, mood: 'smug', t: 1.2 });
-  drawSatori(c, { x: xs, y: FEET, h: CH_H, facing: -1, pose: 'read', mood: 'smile', read: 1, eyeLook: [-.4, -.6], t: 1.2 });
+  drawPatchouli(c, { x: xp, y: L.feet, h: L.h, facing: 1, pose: 'point', gesture: .7, mood: 'smug', t: 1.2 });
+  drawSatori(c, { x: xs, y: L.feet, h: L.h, facing: -1, pose: 'read', mood: 'smile', read: 1, eyeLook: [-.4, -.6], t: 1.2 });
   c.restore();
 }
 document.fonts.load('40px WenKai', '心灵的苦难有物质的机制帕秋莉讲座第集光遗传学诺贝尔生理学或医学奖').then(() => document.fonts.ready).then(() => { const c = cv.getContext('2d'); CLOCK0 = 0; covDraw(c); window.__ready = true; });
