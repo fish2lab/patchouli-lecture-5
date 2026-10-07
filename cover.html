@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>封面</title>
+<style>
+@font-face { font-family: WenKai; src: url(fonts/LXGWWenKai-Regular.ttf); font-display: block; }
+html, body { margin: 0; background: #222; }
+canvas { display: block; }
+</style>
+</head>
+<body>
+<!-- 封面：?ar=169（1920×1080）或 ?ar=43（1440×1080）。tools/cover.mjs 导出 PNG。
+     画面：黑板上一道蓝光照进一群粉笔柱子（被照到的变黄升起），古明地觉的第三只眼看着光；左边大字片名。缩到 480 宽也要认得出片名。 -->
+<canvas id="c"></canvas>
+<script src="src/core.js"></script>
+<script src="src/kit.js"></script>
+<script src="src/lec/chalk.js"></script>
+<script src="src/lec/iso.js"></script>
+<script src="src/character/patchouli.js"></script>
+<script src="src/character/cirno.js"></script>
+<script src="src/rig.js"></script>
+<script src="src/character/ran.js"></script>
+<script src="src/character/meiling.js"></script>
+<script src="src/character/remilia.js"></script>
+<script src="src/character/yukari.js"></script>
+<script src="src/character/satori.js"></script>
+<script>
+const COV_AR = Q.get('ar') === '43' ? '43' : '169', CW = COV_AR === '43' ? 1440 : 1920, CH = 1080, cv = document.getElementById('c');
+cv.width = CW; cv.height = CH;
+// 4:3 取 1920 画面中间的 1440（左右各裁 240），元素按各自的版式重新摆
+const L = COV_AR === '43'
+  ? { ox: 240, x: 300, tag: 40, ts: 128, y1: 300, y2: 448, sub: 44, ys: 548, ter: [1330, 400, 470], sat: [1560, 990, 470], pch: [400, 1075, 360] }
+  : { ox: 0, x: 130, tag: 44, ts: 160, y1: 320, y2: 500, sub: 52, ys: 616, ter: [1340, 420, 600], sat: [1720, 1000, 520], pch: [290, 1080, 400] };
+function covDraw(c) {
+  c.save(); c.translate(-L.ox, 0);
+  ckRoom(c, 0);
+  const [tx, ty, ts] = L.ter;
+  ckLayer(c, CKCAM0, lc => {
+    ckText(lc, '帕秋莉讲座 第 4 集 · 光遗传学', L.x, 150, { size: L.tag, color: 'muted' });
+    ckText(lc, '心灵的苦难', L.x, L.y1, { size: L.ts, heavy: true });
+    ckText(lc, '有物质的机制', L.x, L.y2, { size: L.ts, color: 'yellow', heavy: true });
+    ckUnderline(lc, '物质的', L.x + zhWidth(lc, '有', L.ts), L.y2, L.ts, 'ink', 1, 9);
+    ckText(lc, '2026 诺贝尔生理学或医学奖', L.x, L.ys, { size: L.sub, color: 'blue' });
+    isoTerrain(lc, { x: tx, y: ty, s: ts, light: [4, 4], r: 3, level: 1.7, beam: true });
+  }, { grainAl: .4 });
+  drawPatchouli(c, { x: L.pch[0], y: L.pch[1], h: L.pch[2], facing: 1, pose: 'point', gesture: .7, mood: 'smug', t: 1.2 });
+  drawSatori(c, { x: L.sat[0], y: L.sat[1], h: L.sat[2], facing: -1, pose: 'read', mood: 'smile', read: 1, eyeLook: [.8, -.4], t: 1.2 });
+  c.restore();
+}
+document.fonts.load('40px WenKai', '心灵的苦难有物质的机制帕秋莉讲座第集光遗传学诺贝尔生理学或医学奖').then(() => document.fonts.ready).then(() => { const c = cv.getContext('2d'); CLOCK0 = 0; covDraw(c); window.__ready = true; });
+</script>
+</body>
+</html>
