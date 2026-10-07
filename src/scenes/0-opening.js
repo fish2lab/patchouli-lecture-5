@@ -84,3 +84,20 @@ function s0Draw(c, tau, L) {
   ogCirno(c, tau, L, S0LINES);
 }
 scene({ order: 0, key: 'opening', title: '开场', dur: S0DUR, lines: S0LINES, fn: s0Draw });
+// 粉笔音效（src/lec/sfx.js）：[段内秒, 种类, 时长]。时间照上面 ckWrite 的 t0，时长 = 字数 × spc。
+{ const tb = s0T(4) + 1.4, tn = s0T(4) + 2.4, tl = s0T(5) + .3;
+  sfx('opening', [
+    [s0T(0) + .4, 'chalk', 15 * .06],            // 2026 诺贝尔生理学或医学奖
+    [s0T(1) + .1, 'chalk', 6 * .1],              // → 一把开关
+    [s0T(3) + .5, 'chalk', 6 * .1],              // 读得出：难过
+    [s0T(3) + 2.1, 'chalk', 7 * .1],             // 读不出：为什么
+    [s0T(4), 'whoosh', 2.2],                     // 镜头推近
+    [s0T(4) + .2, 'line', .8],                   // 黄圈圈住「为什么」
+    [tb - .6, 'line', 1.2],                      // 大脑轮廓
+    [tb + .3, 'line', .7],                       // 中央沟
+    ...[0, 1, 2, 3, 4, 5, 6, 7].map(k => [tb + .15 + k * .3, 'tap']),   // 点出神经元
+    [tn, 'tap'], [tn + 1.6, 'tap'],              // 数字落定
+    [tl, 'line', 1.8],                           // 点与点之间连线
+    [tl + .6, 'chalk', 9 * .08],                 // 电信号 · 化学信号
+    [S0DUR - 1.25, 'felt', 1.0],                 // 段末擦黑板（ogOutro）
+  ]); }
