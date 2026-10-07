@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>等轴测粉笔图样张</title>
+<style>
+@font-face { font-family: WenKai; src: url(fonts/LXGWWenKai-Regular.ttf); font-display: block; }
+html, body { margin: 0; background: #1b1714; color: #e8e0d0; font: 15px/1.5 WenKai, KaiTi, serif; }
+#nav { padding: 8px 16px; position: sticky; top: 0; background: #1b1714ee; z-index: 2 } #nav a { color: #c9b27a; margin-right: 14px; }
+canvas { display: block; margin: 8px auto; max-width: 100%; }
+#bar { text-align: center; padding: 4px; color: #a99; }
+</style>
+</head>
+<body>
+<!-- ?fig=terrain|plug|patch|phosphor 播放该图的 8 秒演示（?t=秒 固定在某一刻；?bare 不显示导航）；不带参数列出全部 -->
+<div id="nav"></div><div id="bar"></div><canvas id="cv" width="1920" height="1080"></canvas>
+<script src="src/core.js"></script>
+<script src="src/kit.js"></script>
+<script src="src/lec/chalk.js"></script>
+<script src="src/lec/iso.js"></script>
+<script>
+// 每个图一段 8 秒演示：参数全由 t 决定
+const ISO_TRAIL = Array.from({ length: 73 }, (_, k) => { const t0 = 4.6 + k / 40, u = -1 + k / 72 * 19; return [u, 5 + 2.6 * Math.sin(u * .38), t0]; });
+const ISO_DEMO = {
+  terrain: { title: 'isoTerrain · 一群神经元', draw: (lc, t) => isoTerrain(lc, { x: 960, y: 520, s: 760, r: 2.4, p: sm(0, 1.8, t, x => x),
+    light: key(t, [[0, [.5, 1.5]], [1.8, [.5, 1.5]], [4.6, [7.5, 6.5]], [6, [4, 4]]]), level: lerp(.25, 1, sm(1, 7, t)), beam: true }) },
+  plug: { title: 'isoPlug · 一个突触连接', draw: (lc, t) => isoPlug(lc, { x: 900, y: 470, s: 560, p: sm(0, 1.4, t, x => x),
+    reach: key(t, [[0, 0], [1.4, 0], [3, .85], [3.8, .85], [4.8, .3], [5.8, .3], [7, 1]]), glow: sm(7, 7.6, t) }) },
+  patch: { title: 'isoPatch · 一片回路的节律', draw: (lc, t) => isoPatch(lc, { x: 960, y: 470, s: 820, p: sm(0, 1.6, t, x => x), tau: t, sync: sm(2, 6.5, t) }) },
+  phosphor: { title: 'isoPhosphor · 一片会熄灭的活动', draw: (lc, t) => isoPhosphor(lc, { x: 960, y: 480, s: 860, p: sm(0, 1.6, t, x => x), tau: t,
+    lit: key(t, [[0, 1], [2.4, 1], [4.4, .2]]), trail: ISO_TRAIL }) },
+};
+const ISO_DUR = 8, isoCv = document.getElementById('cv'), isoC = isoCv.getContext('2d'), isoId = Q.get('fig'), isoSel = ISO_DEMO[isoId];
+document.getElementById('nav').innerHTML = Object.entries(ISO_DEMO).map(([k, o]) => `<a href="?fig=${k}">${o.title}</a>`).join('');
+if (Q.has('bare')) document.getElementById('nav').style.display = 'none';
+let isoLast = 0;   // 上一帧图本身的 JS 耗时（ms，不含 GPU 光栅化）
+function isoRender(t) {
+  isoC.setTransform(1, 0, 0, 1, 0, 0);
+  ckRoom(isoC, t);
+  ckLayer(isoC, null, lc => {
+    ckText(lc, isoSel.title, 130, 130, { size: 40, color: 'muted' });
+    ckText(lc, t.toFixed(1) + ' s', 1700, 130, { size: 34, color: 'muted' });
+    const a = performance.now(); isoSel.draw(lc, t); isoLast = performance.now() - a;
+  });
+}
+// 性能：n 帧均匀取在 8 秒里，每帧读回一个像素逼 GPU 画完。整帧 = 黑板 + 粉笔层 + 图；图本身 = 整帧 − 不画图的同一帧
+window.__isoBench = (n = 40) => {
+  const run = skip => { const keep = isoSel.draw; if (skip) isoSel.draw = () => {}; let all = 0;
+    for (let k = 0; k < n; k++) { const t = ISO_DUR * k / n, a = performance.now(); isoRender(t); isoC.getImageData(0, 0, 1, 1); all += performance.now() - a; }
+    isoSel.draw = keep; return all / n; };
+  const frame = run(false), empty = run(true); return { fig: Math.max(0, frame - empty), frame, js: isoLast };
+};
+function isoStart() {
+  if (!isoSel) { document.getElementById('bar').textContent = '选一个图'; isoCv.style.display = 'none'; window.__ready = true; return; }
+  document.getElementById('bar').textContent = `${isoSel.title} · ${ISO_DUR}s 循环`;
+  window.__isoAt = t => { isoRender(t); return isoCv.toDataURL('image/png'); };
+  window.__isoDur = ISO_DUR;
+  if (Q.has('t')) { isoRender(+Q.get('t')); window.__ready = true; return; }
+  const t0 = performance.now(), loop = () => { isoRender(((performance.now() - t0) / 1000) % ISO_DUR); requestAnimationFrame(loop); }; loop(); window.__ready = true;
+}
+document.fonts.load(`40px ${ZH}`, '神经元').then(() => document.fonts.ready).then(isoStart, isoStart);
+</script>
+</body>
+</html>
