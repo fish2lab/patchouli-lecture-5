@@ -1,3 +1,11 @@
+# 心灵的苦难，有物质的机制（帕秋莉讲座 · 光遗传学）
+
+2026 年诺贝尔生理学或医学奖（光遗传学）× 「精神疾病有物质的、可被理解的机制」。约 5 分钟，黑板报画风，古明地觉首次登场。方案、台词、来源核对见 `docs/方案.md`、`docs/来源.md`，发布文案 `docs/发布.md`。本集新增：黑板舞台 `src/lec/chalk.js`（照 V8 黑板报的规范）、粉笔线框 `src/lec/iso.js`（照 hairline 重画，MIT）、粉笔音效 `src/lec/sfx.js`、古明地觉 `src/character/satori.js`。
+
+出片：`npm run voice && npm run render` → `out/patchouli-lecture-optogenetics.mp4`。
+
+---
+
 # 纯代码做一集东方视频（模板）
 
 一个能直接开工的模板：**没有外部美术资源，没有 AI 生图**，整集科普视频的每一笔都是 JavaScript 在 Canvas 上画的——剪纸风的魔导书舞台、六个剪纸角色（帕秋莉、琪露诺、八云蓝、八云紫、红美铃、蕾米莉亚，统一身高）、手写字、油库里配音、背景音乐，最后逐帧渲染成 1080p MP4。
