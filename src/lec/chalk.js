@@ -181,8 +181,6 @@ function ckErase(lc, rect, u) {
     if (v < 1) pos = [ex, by + bh / 2];
   }
   lc.restore();
-  // 擦过的地方留一层淡淡的灰
-  lc.save(); lc.globalAlpha = .05 * Math.min(1, u * 3); lc.fillStyle = CK.ink; lc.fillRect(x, y, w, h * Math.min(1, u)); lc.restore();
   return u < 1 ? (pos || [x + w, y + h - bh / 2]) : null;
 }
 // ckEraser：板擦（屏幕坐标）。rot 弧度，k 缩放
