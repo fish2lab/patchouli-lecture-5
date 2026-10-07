@@ -13,11 +13,17 @@ const WHO_NAME = { cirno: '琪露诺', satori: '古明地觉' };
 function drawSubtitle(c, cur, tau) {
   const a = Math.min(sm(cur.t0, cur.t0 + .12, tau), 1 - sm(cur.t1 - .1, cur.t1, tau));
   if (a <= 0) return;
-  const size = 44, who = cur.o.who && cur.o.who !== 'patchouli' ? (WHO_NAME[cur.o.who] || cur.o.who) + '：' : '', text = who + cur.text;
-  const tw = zhWidth(c, text, size), bw = Math.min(W - 160, tw + 70), bx = CX - bw / 2, by = STAGE.sub.y - size - 8, bh = size + 36;
+  const who = cur.o.who && cur.o.who !== 'patchouli' ? (WHO_NAME[cur.o.who] || cur.o.who) + '：' : '', text = who + cur.text;
+  // 太长就在最靠中间的标点后断成两行（地板只有 190 像素高，两行时字号降到 40）
+  let size = 44, rows = [text];
+  if (zhWidth(c, text, size) > W - 220) { size = 40; const ch = [...text]; let best = -1;
+    ch.forEach((x, i) => { if ('，。、；：！？'.includes(x) && i < ch.length - 1 && (best < 0 || Math.abs(i - ch.length / 2) < Math.abs(best - ch.length / 2))) best = i; });
+    const k = best < 0 ? Math.ceil(ch.length / 2) - 1 : best; rows = [ch.slice(0, k + 1).join(''), ch.slice(k + 1).join('')]; }
+  const lh = size + 10, tw = Math.max(...rows.map(r => zhWidth(c, r, size))), bw = Math.min(W - 120, tw + 70), bx = CX - bw / 2;
+  const bh = rows.length * lh + 26, by = rows.length > 1 ? 902 : STAGE.sub.y - size - 8;
   c.save(); c.globalAlpha = a;
   cutPaper(c, [[bx, by + 3], [bx + bw, by], [bx + bw - 6, by + bh], [bx + 5, by + bh - 2]], '#f7f3ea', { seed: 7 + Math.floor(cur.t0 * 10), step: 40, blur: 6 });
-  zh(c, text, CX, STAGE.sub.y + 4, { size, color: P.ink, align: 'center' });
+  rows.forEach((r, i) => zh(c, r, CX, by + 13 + size * .86 + i * lh, { size, color: P.ink, align: 'center' }));
   c.restore();
 }
 // pageFlip：每段开头 0.6 秒，魔导书页像翻书一样从右往左翻过去（段与段之间的转场）。
